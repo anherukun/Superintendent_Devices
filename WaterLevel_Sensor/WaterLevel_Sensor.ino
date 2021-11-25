@@ -11,7 +11,7 @@
 //#define SERVER_IP "10.0.1.7:9080" // PC address with emulation on host
 #define SERVER_IP "192.168.31.65:25520"
 #define DEVICETYPE "water_level_sensor"
-#define DEVICENAME "Sensor Nivel de Agua"
+#define DEVICENAME "Sensor_Nivel_de_Agua"
 #ifndef STASSID
 #define STASSID "UBNT-HOME"
 #define STAPSK  "Brazil_2014"
@@ -44,6 +44,13 @@ void setup() {
 }
 
 void loop() {
+  SendValue();
+  UpdateConnectionStatus();
+
+  delay(60000);
+}
+
+void SendValue() {
   // wait for WiFi connection
   if ((WiFi.status() == WL_CONNECTED)) {
 
@@ -57,7 +64,7 @@ void loop() {
 
     Serial.print("[HTTP] POST...\n");
     float value = getRandom();
-    Serial.println("{\"IDDevice\":\""+ String(DEVICEID) +"\",\"value\":\"" + String(value, 2) +"\",\"DataType\": \"float\"}");
+    Serial.println(WiFi.localIP().toString() +">>: {\"IDDevice\":\""+ String(DEVICEID) +"\",\"value\":\"" + String(value, 2) +"\",\"DataType\": \"float\"}");
     // start connection and send HTTP header and body
     int httpCode = http.POST("{\"IDDevice\":\""+ String(DEVICEID) +"\",\"value\":\"" + String(value, 2) +"\",\"DataType\": \"float\"}");
 
@@ -79,8 +86,42 @@ void loop() {
 
     http.end();
   }
+}
 
-  delay(60000);
+void UpdateConnectionStatus() {
+  if ((WiFi.status() == WL_CONNECTED)) {
+    WiFiClient client;
+    HTTPClient http;
+    String data = "{\"IPAddress\":\""+ WiFi.localIP().toString() +"\", \"DeviceName\":\""+ DEVICENAME +"\", \"DeviceStatus\":\"Online\"}";
+
+    Serial.print("[HTTP] begin...\n");
+    // configure traged server and url
+    http.begin(client, "http://" SERVER_IP "/api/IOTDevice/Update/" + String(DEVICEID)); //HTTP
+    http.addHeader("Content-Type", "application/json");
+
+    Serial.print("[HTTP] POST...\n");
+    Serial.println(data);
+    // start connection and send HTTP header and body
+    int httpCode = http.POST(data);
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      Serial.printf("[HTTP] POST... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == 201) {
+        const String& payload = http.getString();
+        Serial.println("received payload:\n<<");
+        Serial.println(payload);
+        Serial.println(">>");
+      }
+    } else {
+      Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+
+    http.end();
+  }
 }
 
 void SendConnection() {
