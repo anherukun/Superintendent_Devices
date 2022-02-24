@@ -11,7 +11,7 @@ uint32_t rgbcolors[NUMPIXELS * MULTIPLY];
 void setup()
 {
   pixels.begin();
-  pixels.clear();
+  // pixels.clear();
 
   for (int i = 0; i < NUMPIXELS * MULTIPLY; i++)
   {
@@ -19,18 +19,26 @@ void setup()
     rgbcolors[i] = pixels.ColorHSV(hue);
   }
 
-  // for (int i = 0; i < NUMPIXELS; i++)
-  // {
-  //   pixels.setPixelColor(i, rgbcolors[i]);
-  // }
-  // pixels.show();
+  for (int i = 0; i < NUMPIXELS; i++)
+  {
+    pixels.setPixelColor(i, rgbcolors[i]);
+  }
+  pixels.show();
 }
 
 void loop()
 {
-  pixels.setPixelColor((int)random(0, NUMPIXELS), rgbcolors[(uint32_t)random(0, NUMPIXELS * MULTIPLY) - 1]);
+  // for (int i = 0; i < NUMPIXELS; i++)
+  // {
+  //   pixels.setPixelColor(i, rgbcolors[(uint32_t)random(0, NUMPIXELS)]);
+  //   delay(DELAYVAL);
+  //   pixels.show();
+  // }
+
+  pixels.setPixelColor((int)random(0, NUMPIXELS), rgbcolors[(uint32_t)random(0, (NUMPIXELS * MULTIPLY) - 1)]);
   delay(DELAYVAL);
   pixels.show();
+
   // for (int step = 0; step < MULTIPLY; step++)
   // {
   //   for (int i = 0; i < NUMPIXELS; i++)
