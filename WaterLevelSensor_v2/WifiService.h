@@ -1,8 +1,59 @@
-#include <Arduino.h>
-#include <WiFi.h>
-#include <WiFiManager.h>
+// #include "BLEService.h"
+#include "BluetoothService.h"
+#include "PreferencesService.h"
 
-WiFiManager wifiManager;
+#include <Arduino.h>
+#include <ArduinoJson.h>
+#include <WiFi.h>
+
+class BLE_WiFiCredentialsCallback : public BLECharacteristicCallbacks
+{
+    void onWrite(BLECharacteristic *pCharacteristic)
+    {
+        std::string rxValue = pCharacteristic->getValue();
+
+        if (rxValue.length() > 0)
+        {
+            Serial.println("Reciving credentials");
+
+            String raw = "";
+
+            for (int i = 0; i < rxValue.length(); i++)
+                raw += rxValue[i];
+
+            StaticJsonDocument<150> doc;
+
+            DeserializationError error = deserializeJson(doc, raw);
+
+            if (error)
+            {
+                Serial.print("deserializeJson() failed: ");
+                Serial.println(error.c_str());
+                return;
+            }
+
+            String SSID = doc["SSID"];
+            String Password = doc["Password"];
+
+            Preferences prefs;
+            prefs.begin("credentials", false);
+
+            prefs.putString("STA_SSID", SSID);
+            prefs.putString("STA_PASSWORD", Password);
+
+            // Serial.println(prefs.getString("STA_SSID"));
+            // Serial.println(prefs.getString("STA_PASSWORD"));
+
+            // Serial.println(raw);
+            Serial.println("Saving in Preferences");
+
+            prefs.end();
+            delay(2000);
+
+            ESP.restart();
+        }
+    }
+};
 
 void WiFiEvent(WiFiEvent_t event)
 {
@@ -62,46 +113,102 @@ void WiFiEvent(WiFiEvent_t event)
     case ARDUINO_EVENT_WIFI_STA_GOT_IP6:
         Serial.println("STA IPv6 is preferred");
         break;
-    case ARDUINO_EVENT_ETH_GOT_IP:
-        Serial.println("Obtained IP address");
-        break;
     default:
         break;
     }
 }
 
-void WiFiGotIP(WiFiEvent_t event, WiFiEventInfo_t info)
+void StartWifiService()
 {
-    Serial.println("WiFi connected");
-    Serial.println("IP address: ");
-    Serial.println(IPAddress(info.got_ip.ip_info.ip.addr));
-}
+    Serial.println("Looking for wifi credentials");
 
-/// @brief Inicia el servicio de wifi, lanzara un sitio web captivo para configurar la conexcion al access point al que se conectara
-/// @param ssid Nombre de la red inalambrica que iniciara temporalmente
-/// @param password Contraseña de la red inalambrica
-void StartWifiService(char const *ssid, char const *password)
-{
-    if (wifiManager.autoConnect(ssid, password))
+    PreferencesService prefsService = PreferencesService("credentials", true);
+
+    if (prefsService.GetString("STA_SSID") == "")
     {
-        Serial.println("✅  Wifi connected");
-    }
-    else
-    {
-        Serial.print("⏳  Wating for connection or setup");
-        while (!WiFi.isConnected())
+        BluetoothService blService = BluetoothService();
+        blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
+
+        delay(1000);
+
+        prefsService.Close();
+
+        while (true)
         {
             Serial.print(".");
             delay(1000);
         }
-        Serial.println("✅  Wifi connected");
     }
 
+    Serial.println("Credentials found");
+
+    String const sta_ssid = prefsService.GetString("STA_SSID");
+    String const sta_password = prefsService.GetString("STA_PASSWORD");
+
+    delay(100);
+
+    Serial.println("Wifi credentials: SSID=" + sta_ssid + " PSWD=" + sta_password);
+
+    WiFi.setHostname("XIAO_C3");
+    WiFi.begin(sta_ssid, sta_password);
+
     WiFi.onEvent(WiFiEvent);
-    WiFi.onEvent(WiFiGotIP, WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_GOT_IP);
     WiFiEventId_t eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info)
                                          {
         Serial.print("WiFi lost connection. Reason: ");
         Serial.println(info.wifi_sta_disconnected.reason); },
                                          WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+
+    prefsService.Close();
 }
+
+class WifiService
+{
+private:
+public:
+    /// @brief Inicia el servicio de red y se conecta a una conexion WIFI con las credenciales guardadas en las preferencias del dispositivo.
+    /// Si no hay credenciales registradas o validas lanzara un servicio bluetooth para obtener las credenciales desde un callback
+    WifiService()
+    {
+        Serial.println("Looking for wifi credentials");
+
+        PreferencesService prefsService = PreferencesService("credentials", true);
+
+        if (prefsService.GetString("STA_SSID") == "")
+        {
+            BluetoothService blService = BluetoothService();
+            blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
+
+            delay(1000);
+
+            prefsService.Close();
+
+            while (true)
+            {
+                Serial.print(".");
+                delay(1000);
+            }
+        }
+
+        Serial.println("Credentials found");
+
+        String const sta_ssid = prefsService.GetString("STA_SSID");
+        String const sta_password = prefsService.GetString("STA_PASSWORD");
+
+        delay(100);
+
+        Serial.println("Wifi credentials: SSID=" + sta_ssid + " PSWD=" + sta_password);
+
+        WiFi.setHostname("XIAO_C3");
+        WiFi.begin(sta_ssid, sta_password);
+
+        WiFi.onEvent(WiFiEvent);
+        WiFiEventId_t eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info)
+                                             {
+        Serial.print("WiFi lost connection. Reason: ");
+        Serial.println(info.wifi_sta_disconnected.reason); },
+                                             WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
+
+        prefsService.Close();
+    }
+};

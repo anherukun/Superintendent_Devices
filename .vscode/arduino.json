@@ -1,6 +1,6 @@
 {
     "sketch": "WaterLevelSensor_v2\\WaterLevelSensor_v2.ino",
-    "configuration": "CDCOnBoot=default,PartitionScheme=default,CPUFreq=160,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none,EraseFlash=none",
+    "configuration": "CDCOnBoot=default,PartitionScheme=huge_app,CPUFreq=160,FlashMode=qio,FlashFreq=80,FlashSize=4M,UploadSpeed=921600,DebugLevel=none,EraseFlash=all",
     "board": "esp32:esp32:XIAO_ESP32C3",
     "port": "COM5"
 }
