@@ -3,6 +3,8 @@
 #include "WifiService.h"
 #include "TimeService.h"
 
+#include <FirebaseESP32.h>
+
 // const char *SSID = DEVICE_NAME;
 // const char *PASSWORD = DEVICE_PASSWORD;
 
