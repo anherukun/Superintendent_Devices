@@ -24,17 +24,17 @@ public:
         delay(100);
     }
 
-    void CreateCharacteristic(const char *uuid, u_int32_t properties, BLECharacteristicCallbacks *pCallbacks)
+    void CreateCharacteristic(const char *characteristic_uuid, const char *service_uuid, u_int32_t properties, BLECharacteristicCallbacks *pCallbacks)
     {
         Serial.println("Creating new characteristic...");
 
-        BLECharacteristic *pCharacteristic = pService->createCharacteristic(uuid, BLECharacteristic::PROPERTY_WRITE);
+        BLECharacteristic *pCharacteristic = pService->createCharacteristic(characteristic_uuid, BLECharacteristic::PROPERTY_WRITE);
         pCharacteristic -> setCallbacks(pCallbacks);
 
         pService->start();
         
         BLEAdvertising *pAdvertising = bleDevice.getAdvertising();
-        pAdvertising->addServiceUUID(uuid);
+        pAdvertising->addServiceUUID(service_uuid);
         pAdvertising->setScanResponse(true);
         pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
         pAdvertising->setMinPreferred(0x12);

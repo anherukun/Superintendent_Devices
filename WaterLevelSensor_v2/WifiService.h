@@ -127,7 +127,7 @@ void StartWifiService()
     if (prefsService.GetString("STA_SSID") == "")
     {
         BluetoothService blService = BluetoothService();
-        blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
+        blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLE_SERVICE_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
 
         delay(1000);
 
@@ -177,7 +177,7 @@ public:
         if (prefsService.GetString("STA_SSID") == "")
         {
             BluetoothService blService = BluetoothService();
-            blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
+            blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLE_SERVICE_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
 
             delay(1000);
 
