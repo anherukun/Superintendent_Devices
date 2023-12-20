@@ -13,8 +13,6 @@ void setup()
     Serial.begin(115200);
     
     WifiService wifiService = WifiService();
-    // StartWifiService();
-    //StartWifiService(SSID, PASSWORD);
 
     StartTimeService();
 }
@@ -24,5 +22,6 @@ void loop()
     delay(1000);
 
     String timestring = GetTime();
-    Serial.println("Time: " + timestring);
+    Serial.print("Time: ");
+    Serial.println(timestring);
 }

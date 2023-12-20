@@ -118,50 +118,6 @@ void WiFiEvent(WiFiEvent_t event)
     }
 }
 
-void StartWifiService()
-{
-    Serial.println("Looking for wifi credentials");
-
-    PreferencesService prefsService = PreferencesService("credentials", true);
-
-    if (prefsService.GetString("STA_SSID") == "")
-    {
-        BluetoothService blService = BluetoothService();
-        blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLE_SERVICE_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
-
-        delay(1000);
-
-        prefsService.Close();
-
-        while (true)
-        {
-            Serial.print(".");
-            delay(1000);
-        }
-    }
-
-    Serial.println("Credentials found");
-
-    String const sta_ssid = prefsService.GetString("STA_SSID");
-    String const sta_password = prefsService.GetString("STA_PASSWORD");
-
-    delay(100);
-
-    Serial.println("Wifi credentials: SSID=" + sta_ssid + " PSWD=" + sta_password);
-
-    WiFi.setHostname("XIAO_C3");
-    WiFi.begin(sta_ssid, sta_password);
-
-    WiFi.onEvent(WiFiEvent);
-    WiFiEventId_t eventID = WiFi.onEvent([](WiFiEvent_t event, WiFiEventInfo_t info)
-                                         {
-        Serial.print("WiFi lost connection. Reason: ");
-        Serial.println(info.wifi_sta_disconnected.reason); },
-                                         WiFiEvent_t::ARDUINO_EVENT_WIFI_STA_DISCONNECTED);
-
-    prefsService.Close();
-}
-
 class WifiService
 {
 private:
@@ -176,8 +132,9 @@ public:
 
         if (prefsService.GetString("STA_SSID") == "")
         {
-            BluetoothService blService = BluetoothService();
+            BluetoothService blService = BluetoothService(BLE_ECOZY_DEVICE_UUID);
             blService.CreateCharacteristic(WIFI_CHARACTERISTIC_UUID, BLE_SERVICE_UUID, BLECharacteristic::PROPERTY_WRITE, new BLE_WiFiCredentialsCallback());
+            blService.StartService();
 
             delay(1000);
 
@@ -197,7 +154,11 @@ public:
 
         delay(100);
 
-        Serial.println("Wifi credentials: SSID=" + sta_ssid + " PSWD=" + sta_password);
+        //Serial.println("Wifi credentials: SSID=" + sta_ssid + " PSWD=" + sta_password);
+        Serial.print("Wifi credentials: SSID=");
+        Serial.print(sta_ssid);
+        Serial.print(" PSWD=");
+        Serial.println(sta_password);
 
         WiFi.setHostname("XIAO_C3");
         WiFi.begin(sta_ssid, sta_password);
