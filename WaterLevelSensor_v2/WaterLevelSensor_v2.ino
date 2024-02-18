@@ -1,12 +1,12 @@
 #include <Arduino.h>
 
+// #include "VisualFeedbackService.h"
 #include "WifiService.h"
 #include "TimeService.h"
 
 #include <FirebaseESP32.h>
 
-// const char *SSID = DEVICE_NAME;
-// const char *PASSWORD = DEVICE_PASSWORD;
+VisualFeedbackService feedback = VisualFeedbackService();
 
 const byte FEEDBACK_LED = 9;
 
@@ -18,14 +18,16 @@ void setup()
 
     WifiService wifiService = WifiService();
 
+    feedback.Off();
     StartTimeService();
 }
 
 void loop()
 {
-    delay(1000);
+    feedback.FadeInOut(750);
 
     String timestring = GetTime();
+
     Serial.print("Time: ");
     Serial.println(timestring);
 }

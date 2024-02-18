@@ -16,9 +16,9 @@ public:
     }
 
     /// @brief Enciende el indicador visual
-    void On()
+    void On(byte brightness = 254)
     {
-        ledcWrite(FEEDBACK_CHANNEL, 254);
+        ledcWrite(FEEDBACK_CHANNEL, brightness);
     }
 
     /// @brief Apaga el indicador visual
