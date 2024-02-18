@@ -1,6 +1,7 @@
 // #include "BLEService.h"
 #include "BluetoothService.h"
 #include "PreferencesService.h"
+#include "VisualFeedbackService.h"
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
@@ -140,8 +141,12 @@ public:
 
             prefsService.Close();
 
+            VisualFeedbackService feedback = VisualFeedbackService();
+
             while (true)
             {
+                // feedback.Blink();
+                feedback.FadeInOut(1500);
                 Serial.print(".");
                 delay(1000);
             }
