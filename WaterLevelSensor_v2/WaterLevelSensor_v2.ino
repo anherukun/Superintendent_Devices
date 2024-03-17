@@ -26,7 +26,7 @@ void setup()
 
 void loop()
 {
-    feedback.FadeInOut(750);
+    feedback.FadeInOut(1000);
 
     String timestring = GetTime();
 

@@ -19,11 +19,23 @@ public:
         digitalWrite(TRIG, LOW);
 
         duration_us = pulseIn(ECHO, HIGH);
+
+        // Serial.println(duration_us);
+        
+        // COMPROBACION: SI LA LECTURA DE DURACION ES CERO, SE RETORNARA LA LECTURA ANTERIOR
+        if (duration_us == 0)
+            return distance_cm;
+
+        // COMPROBACION: SI LA LECTURA ES DE UNA DISTANCIA MAYOR A 600, SE RETORNARA LA
+        // LECTURA ANTERIOR
+
+        if (0.017 * duration_us > 600)
+            return distance_cm;
+
+        // SE ALMACENARA LA NUEVA LECTURA
         distance_cm = 0.017 * duration_us;
 
-        if (distance_cm > 600)
-            return 0;
-            
+        // SE RETORNA LA LECTURA OBTENIDA
         return distance_cm;
     }
 };
