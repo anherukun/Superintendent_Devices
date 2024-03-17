@@ -220,6 +220,8 @@
                 "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\BLE\\src",
                 "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\WiFi\\src",
                 "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\Preferences\\src",
+                "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\HTTPClient\\src",
+                "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\WiFiClientSecure\\src",
                 "D:\\Datos_Perfil\\angel\\Documents\\Arduino\\libraries\\Firebase_ESP32_Client\\src",
                 "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\LittleFS\\src",
                 "C:\\Users\\angel\\AppData\\Local\\Arduino15\\packages\\esp32\\hardware\\esp32\\2.0.14\\libraries\\FS\\src",
