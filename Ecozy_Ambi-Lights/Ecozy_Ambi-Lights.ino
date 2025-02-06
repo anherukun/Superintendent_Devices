@@ -14,27 +14,26 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(pixelCount, pixelPin, NEO_GRB + NEO
 
 void setup()
 {
-    // Serial.begin(115200, SERIAL_8N1, 3, 1, false, RX_BUF_SIZE);
     Serial.setRxBufferSize(RX_BUF_SIZE);
     Serial.begin(115200);
     pixels.begin();
-    // Serial.onEvent(Serial_OnEvent,)
+
+    pixels.setBrightness(255 / 2);
 }
 
 // the loop function runs over and over again forever
 void loop()
 {
-    if (stringComplete == true)
-    {
-        Serial.println(inputString);
+    // if (stringComplete == true)
+    // {
+    //     Serial.println(inputString);
 
-        delay(250);
+    //     delay(250);
 
-        stringComplete = false;
-        inputString = "";
-    }
+    //     stringComplete = false;
+    //     inputString = "";
+    // }
 
-    pixels.setBrightness(255 / 2);
 
     while (Serial.available())
     {
