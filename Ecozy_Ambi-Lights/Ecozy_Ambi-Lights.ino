@@ -1,5 +1,7 @@
 #include <Adafruit_NeoPixel.h>
 
+#define RX_BUF_SIZE 1024
+
 byte pixelPin = 4;
 byte pixelCount = 64;
 
@@ -12,6 +14,8 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(pixelCount, pixelPin, NEO_GRB + NEO
 
 void setup()
 {
+    // Serial.begin(115200, SERIAL_8N1, 3, 1, false, RX_BUF_SIZE);
+    Serial.setRxBufferSize(RX_BUF_SIZE);
     Serial.begin(115200);
     pixels.begin();
     // Serial.onEvent(Serial_OnEvent,)
@@ -29,6 +33,8 @@ void loop()
         stringComplete = false;
         inputString = "";
     }
+
+    pixels.setBrightness(255 / 2);
 
     while (Serial.available())
     {
