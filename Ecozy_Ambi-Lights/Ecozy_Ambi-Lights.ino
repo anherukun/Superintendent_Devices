@@ -24,20 +24,8 @@ void setup()
 // the loop function runs over and over again forever
 void loop()
 {
-    // method_2();
     method_1();
-    pixels.show();
-    // if (stringComplete == true)
-    // {
-    //     Serial.println(inputString);
 
-    //     delay(250);
-
-    //     stringComplete = false;
-    //     inputString = "";
-    // }
-
-    // pixels.clear();
     Serial.flush();
 }
 
@@ -54,6 +42,8 @@ void method_1()
         // pixels.setPixelColor(0, r_code, g_code, b_code);
 
         pixels.setPixelColor(i_code, r_code, g_code, b_code);
+        pixels.show();
+
         // pixels.show();
 
         // char inChar = (char)inByte;
