@@ -31,7 +31,7 @@ void loop()
 
 void method_1()
 {
-    while (Serial.available())
+    if (Serial.available())
     {
         // inByte = Serial.read();
         byte i_code = Serial.read();
