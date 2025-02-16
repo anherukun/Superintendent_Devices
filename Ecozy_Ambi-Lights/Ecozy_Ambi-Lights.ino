@@ -12,7 +12,7 @@ byte i_count = 0;
 void setup()
 {
     Serial.setRxBufferSize(RX_BUF_SIZE);
-    Serial.begin(10000);
+    Serial.begin(9600);
     pixels.begin();
 
     pixels.setBrightness((255 / 3) * 2);
