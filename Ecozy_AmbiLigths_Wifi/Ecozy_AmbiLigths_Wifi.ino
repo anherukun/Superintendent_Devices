@@ -1,6 +1,4 @@
-// #include <WiFi.h>
 #include <WiFiUdp.h>
-// #include <IotWebConf.h>
 #include <WiFiManager.h>
 #include <FastLED.h>
 
@@ -8,6 +6,7 @@
 #define NUM_LEDS 32
 #define DATA_PIN 4
 #define CLOCK_PIN 13
+#define LED_TYPE WS2812B
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
@@ -25,35 +24,40 @@ WiFiUDP udp;
 
 void setup()
 {
+    FastLED.addLeds<LED_TYPE, DATA_PIN, GRB>(leds, NUM_LEDS); // GRB ordering is typical
+    FastLED.clearData();
+    FastLED.show();
+
     // WiFi.begin();
     Serial.begin(115200);
-    WiFi.mode(WIFI_STA);
-    WiFi.onEvent(WiFiEvent);
+    // WiFi.mode(WIFI_STA);
     delay(3000);
 
-    if (!WiFi.isConnected())
-    {
-        wifiManager.setTitle("Ecozy AmbiLigths");
-        wifiManager.setDarkMode(true);
-        wifiManager.autoConnect("Ecozy-AmbiLigths");
-        
-        // ESP.restart();
-    }
+    // wifiManager.resetSettings();
+
+    WiFi.onEvent(WiFiEvent);
+    wifiManager.setTitle("Ecozy AmbiLigths");
+    wifiManager.setDarkMode(true);
+    wifiManager.autoConnect("Ecozy-AmbiLigths");
+
+    // if (!WiFi.isConnected())
+    // {
+    //     wifiManager.setTitle("Ecozy AmbiLigths");
+    //     wifiManager.setDarkMode(true);
+    //     wifiManager.autoConnect("Ecozy-AmbiLigths");
+
+    //     // ESP.restart();
+    // }
 
     Serial.println("WiFi Conectado");
 
     localIP = WiFi.localIP();   // Obtener IP local
     subnet = WiFi.subnetMask(); // Obtener máscara de subred
     broadcastIP = localIP | ~subnet;
-    
+
     Serial.println(localIP);
     Serial.println(subnet);
     Serial.println(broadcastIP);
-    
-
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS); // GRB ordering is typical
-    FastLED.clearData();
-    FastLED.show();
 }
 
 void WiFiEvent(WiFiEvent_t event)
@@ -66,7 +70,7 @@ void WiFiEvent(WiFiEvent_t event)
         Serial.println(WiFi.localIP());
         // initializes the UDP state
         // This initializes the transfer buffer
-        udp.begin(WiFi.localIP(), udpPort);
+        udp.begin(localIP, udpPort);
         connected = true;
         break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
@@ -80,12 +84,43 @@ void WiFiEvent(WiFiEvent_t event)
 
 void loop()
 {
-    delay(1000);
+    delay(100);
+
     Serial.print(".");
+
+    int packetSize = udp.parsePacket();
+
+    if (packetSize > 0)
+    {
+        Serial.println("Incomming message:");
+
+        byte buffer[packetSize];
+        Serial.println("Size: " + packetSize);
+
+        udp.readBytes(buffer, packetSize);
+
+        for (size_t i = 0; i < packetSize; i++)
+        {
+            Serial.println((char)buffer[i]);
+        }
+
+        for (size_t i = 0; i < packetSize; i += 4)
+        {
+            byte pByte = buffer[i + 0];
+            byte rByte = buffer[i + 1];
+            byte gByte = buffer[i + 2];
+            byte bByte = buffer[i + 3];
+
+            leds[pByte] = CRGB(rByte, gByte, bByte);
+            FastLED.show();
+        }
+
+        udp.flush();
+    }
 
     if (connected)
     {
-        String p = "{\"IP\" = \"" + localIP.toString() + "\" }";
+        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAdress\":\"" + WiFi.macAddress() + "\" }";
         // Send a packet
         udp.beginPacket(broadcastIP, udpPort);
         // udp.printf("Seconds since boot: %lu", millis() / 1000);
@@ -95,7 +130,8 @@ void loop()
         // String udpString = udp.readString();
         // Serial.println(udpString);
     }
-    // Turn the LED on, then pause
+
+    // // Turn the LED on, then pause
     // for (size_t i = 0; i < NUM_LEDS; i++)
     // {
     //     leds[i] = CRGB::Red;
