@@ -95,17 +95,17 @@ void loop()
 
     if (packetSize > 0)
     {
-        Serial.println("Incomming message:");
+        Serial.print("Incomming message, ");
+        Serial.println("Size: " + packetSize);
 
         byte buffer[packetSize];
-        Serial.println("Size: " + packetSize);
 
         udp.readBytes(buffer, packetSize);
 
-        for (size_t i = 0; i < packetSize; i++)
-        {
-            Serial.println((char)buffer[i]);
-        }
+        // for (size_t i = 0; i < packetSize; i++)
+        // {
+        //     Serial.println((char)buffer[i]);
+        // }
 
         for (size_t i = 0; i < packetSize; i += 4)
         {
@@ -132,7 +132,7 @@ void loop()
         udp.endPacket();
     }
 
-    delay(100);
+    delay(2);
 
     Serial.print(".");
 }
