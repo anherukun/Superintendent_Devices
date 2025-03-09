@@ -123,8 +123,8 @@ void loop()
 
     else if (packetSize == 0)
     {
-        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0}
-        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0 }";
+        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0, "DeviceType":0 }
+        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceType\":0 }";
         // Send a packet
         udp.beginPacket(broadcastIP, udpPort);
         // udp.printf("Seconds since boot: %lu", millis() / 1000);
