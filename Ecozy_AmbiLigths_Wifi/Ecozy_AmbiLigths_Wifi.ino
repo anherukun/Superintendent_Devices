@@ -84,9 +84,12 @@ void WiFiEvent(WiFiEvent_t event)
 
 void loop()
 {
-    delay(100);
-
-    Serial.print(".");
+    if (!connected)
+    {
+        Serial.print(".");
+        delay(1000);
+        return;
+    }   
 
     int packetSize = udp.parsePacket();
 
@@ -118,31 +121,18 @@ void loop()
         udp.flush();
     }
 
-    if (connected)
+    else if (packetSize == 0)
     {
-        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAdress\":\"" + WiFi.macAddress() + "\" }";
+        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0}
+        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0 }";
         // Send a packet
         udp.beginPacket(broadcastIP, udpPort);
         // udp.printf("Seconds since boot: %lu", millis() / 1000);
         udp.print(p);
         udp.endPacket();
-
-        // String udpString = udp.readString();
-        // Serial.println(udpString);
     }
 
-    // // Turn the LED on, then pause
-    // for (size_t i = 0; i < NUM_LEDS; i++)
-    // {
-    //     leds[i] = CRGB::Red;
-    //     FastLED.show();
-    //     delay(50);
-    // }
+    delay(100);
 
-    // for (size_t i = 0; i < NUM_LEDS; i++)
-    // {
-    //     leds[i] = CRGB::Black;
-    //     FastLED.show();
-    //     delay(50);
-    // }
+    Serial.print(".");
 }
