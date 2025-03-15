@@ -119,20 +119,21 @@ void loop()
         }
 
         udp.flush();
+
+        return;
     }
 
-    else if (packetSize == 0)
+    else
     {
         // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0, "DeviceType":0 }
         String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceType\":0 }";
         // Send a packet
         udp.beginPacket(broadcastIP, udpPort);
-        // udp.printf("Seconds since boot: %lu", millis() / 1000);
         udp.print(p);
         udp.endPacket();
-    }
 
-    delay(2);
+        delay(500);
+    }
 
     Serial.print(".");
 }
