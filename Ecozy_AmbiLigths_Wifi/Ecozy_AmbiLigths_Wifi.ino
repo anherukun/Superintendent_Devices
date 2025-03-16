@@ -22,6 +22,10 @@ IPAddress broadcastIP;
 const int udpPort = 3333;
 WiFiUDP udp;
 
+byte DEVICE_FAMILY = 0; // AmbientLigths
+byte DEVICE_MODEL = 0; // AmbientLigths_Backligth_Lite
+// byte DEVICE_MODEL = 1; // AmbientLigths_Backligth
+
 void setup()
 {
     FastLED.addLeds<LED_TYPE, DATA_PIN, GRB>(leds, NUM_LEDS); // GRB ordering is typical
@@ -125,8 +129,9 @@ void loop()
 
     else
     {
-        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0, "DeviceType":0 }
-        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceType\":0 }";
+        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0,  "DeviceInformation":{"DeviceFamily":0, "DeviceModel":0}}
+        // String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceType\":0 }";
+        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceInformation\":{\"DeviceFamily\":" + DEVICE_FAMILY + ", \"DeviceModel\":" + DEVICE_MODEL + "}}";
         // Send a packet
         udp.beginPacket(broadcastIP, udpPort);
         udp.print(p);
