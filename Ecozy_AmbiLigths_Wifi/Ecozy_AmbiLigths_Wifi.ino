@@ -119,9 +119,9 @@ void loop()
             byte bByte = buffer[i + 3];
 
             leds[pByte] = CRGB(rByte, gByte, bByte);
-            FastLED.show();
         }
-
+        FastLED.show();
+        
         udp.flush();
 
         return;
@@ -137,7 +137,7 @@ void loop()
         udp.print(p);
         udp.endPacket();
 
-        delay(500);
+        // delay(1);
     }
 
     Serial.print(".");
