@@ -2,7 +2,6 @@
 #include <WiFiManager.h>
 #include <FastLED.h>
 
-// How many leds in your strip?
 #define NUM_LEDS 32
 #define DATA_PIN 4
 #define CLOCK_PIN 13
@@ -19,12 +18,13 @@ IPAddress localIP; // Obtener IP local
 IPAddress subnet;  // Obtener máscara de subred
 IPAddress broadcastIP;
 
-const int udpPort = 3333;
+// const int udpPort = 3333;
+#define TX_UDP_PORT 1996
+#define RX_UDP_PORT 1999
 WiFiUDP udp;
 
 byte DEVICE_FAMILY = 0; // AmbientLigths
-byte DEVICE_MODEL = 0; // AmbientLigths_Backligth_Lite
-// byte DEVICE_MODEL = 1; // AmbientLigths_Backligth
+byte DEVICE_MODEL = 0;  // AmbientLigths_Backligth_Lite
 
 void setup()
 {
@@ -32,9 +32,7 @@ void setup()
     FastLED.clearData();
     FastLED.show();
 
-    // WiFi.begin();
     Serial.begin(115200);
-    // WiFi.mode(WIFI_STA);
     delay(3000);
 
     // wifiManager.resetSettings();
@@ -43,15 +41,6 @@ void setup()
     wifiManager.setTitle("Ecozy AmbiLigths");
     wifiManager.setDarkMode(true);
     wifiManager.autoConnect("Ecozy-AmbiLigths");
-
-    // if (!WiFi.isConnected())
-    // {
-    //     wifiManager.setTitle("Ecozy AmbiLigths");
-    //     wifiManager.setDarkMode(true);
-    //     wifiManager.autoConnect("Ecozy-AmbiLigths");
-
-    //     // ESP.restart();
-    // }
 
     Serial.println("WiFi Conectado");
 
@@ -74,7 +63,10 @@ void WiFiEvent(WiFiEvent_t event)
         Serial.println(WiFi.localIP());
         // initializes the UDP state
         // This initializes the transfer buffer
-        udp.begin(localIP, udpPort);
+        udp.setTimeout(66);
+        udp.begin(localIP, RX_UDP_PORT);
+        Serial.print("UDP Timeout: ");
+        Serial.println(udp.getTimeout());
         connected = true;
         break;
     case ARDUINO_EVENT_WIFI_STA_DISCONNECTED:
@@ -90,17 +82,31 @@ void loop()
 {
     if (!connected)
     {
-        Serial.print(".");
+        Serial.print("..WIFI_DISCONNECTED..");
         delay(1000);
         return;
-    }   
+    }
+
+    else
+    {
+        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0,  "DeviceInformation":{"DeviceFamily":0, "DeviceModel":0}}
+        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceInformation\":{\"DeviceFamily\":" + DEVICE_FAMILY + ", \"DeviceModel\":" + DEVICE_MODEL + "}}";
+        // Send a packet
+        udp.beginPacket(broadcastIP, TX_UDP_PORT);
+        udp.print(p);
+        udp.endPacket();
+
+        // delay(1);
+    }
+
+    delay(2);
 
     int packetSize = udp.parsePacket();
 
     if (packetSize > 0)
     {
-        Serial.print("Incomming message, ");
-        Serial.println("Size: " + packetSize);
+        // Serial.print("Incomming message, ");
+        // Serial.println("Size: " + packetSize);
 
         byte buffer[packetSize];
 
@@ -120,25 +126,22 @@ void loop()
 
             leds[pByte] = CRGB(rByte, gByte, bByte);
         }
+
         FastLED.show();
-        
-        udp.flush();
 
-        return;
+        // byte pByte = buffer[0];
+        // byte rByte = buffer[1];
+        // byte gByte = buffer[2];
+        // byte bByte = buffer[3];
+        // leds[pByte] = CRGB(rByte, gByte, bByte);
+        // FastLED.show();
+        // return;
     }
 
-    else
-    {
-        // {"IP":"0.0.0.0", "MACAddress":"00-00-00-00-00-00", "ConnectionType":0,  "DeviceInformation":{"DeviceFamily":0, "DeviceModel":0}}
-        // String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceType\":0 }";
-        String p = "{\"IP\":\"" + localIP.toString() + "\", \"MACAddress\":\"" + WiFi.macAddress() + "\", \"ConnectionType\":0, \"DeviceInformation\":{\"DeviceFamily\":" + DEVICE_FAMILY + ", \"DeviceModel\":" + DEVICE_MODEL + "}}";
-        // Send a packet
-        udp.beginPacket(broadcastIP, udpPort);
-        udp.print(p);
-        udp.endPacket();
+    // Serial.print(".");
+    // Serial.flush();
+    
+    udp.flush();
 
-        // delay(1);
-    }
-
-    Serial.print(".");
+    delay(2);
 }
