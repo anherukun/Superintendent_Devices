@@ -2,7 +2,7 @@
 #include <WiFiManager.h>
 #include <FastLED.h>
 
-#define NUM_LEDS 32
+#define NUM_LEDS 48
 #define DATA_PIN 4
 #define CLOCK_PIN 13
 #define LED_TYPE WS2812B
