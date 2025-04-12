@@ -13,7 +13,11 @@
   All text above, and the splash screen must be included in any redistribution
 
   i2c SH1106 modified by Rupert Hirst  12/09/21
-*********************************************************************/
+  *********************************************************************/
+
+// Eliminar del directorio C:\Users\angel\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk\esp32c3\include
+// la carpeta qrcode
+#include "qrcode.h"
 
 #include <SPI.h>
 #include <Wire.h>
@@ -44,30 +48,8 @@
 #define OLED_RESET -1	 //   QT-PY / XIAO
 Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
-#define NUMFLAKES 10
-#define XPOS 0
-#define YPOS 1
-#define DELTAY 2
-
-// #define LOGO16_GLCD_HEIGHT 16
-// #define LOGO16_GLCD_WIDTH 16
-// static const unsigned char PROGMEM logo16_glcd_bmp[] =
-// 	{B00000000, B11000000,
-// 	 B00000001, B11000000,
-// 	 B00000001, B11000000,
-// 	 B00000011, B11100000,
-// 	 B11110011, B11100000,
-// 	 B11111110, B11111000,
-// 	 B01111110, B11111111,
-// 	 B00110011, B10011111,
-// 	 B00011111, B11111100,
-// 	 B00001101, B01110000,
-// 	 B00011011, B10100000,
-// 	 B00111111, B11100000,
-// 	 B00111111, B11110000,
-// 	 B01111100, B11110000,
-// 	 B01110000, B01110000,
-// 	 B00000000, B00110000};
+// #define WIFI_QR "WIFI:S:MiRedWiFi;T:WPA;P:contraseña123;H:false;;"
+#define WIFI_PASSWORD "19961999"
 
 WebServer server(80);
 
@@ -82,6 +64,11 @@ void setup()
 	digitalWrite(GPIO_POWER, LOW);
 
 	Serial.begin(115200);
+
+	// WiFi.mode(WIFI_STA);
+	WiFi.softAP("EZ_" + WiFi.macAddress().substring(12, 17), WIFI_PASSWORD, 1, 0, 1);
+	WiFi.onEvent(WiFiEvent);
+
 	Wire.begin(GPIO_SDA, GPIO_SCL);
 	// Show image buffer on the display hardware.
 	// Since the buffer is intialized with an Adafruit splashscreen
@@ -98,335 +85,127 @@ void setup()
 	display.clearDisplay();
 	display.display();
 
-	display.setTextSize(1);
-	display.setTextColor(SH110X_WHITE);
-	display.setCursor(0, 0);
-	display.println("Hola mundo");
-	display.setTextColor(SH110X_BLACK, SH110X_WHITE); // 'inverted' text
-	display.println(3.141592, 6);
-	display.setTextSize(2);
-	display.setTextColor(SH110X_WHITE);
-	display.print("0x");
-	display.println(0xDEADBEEF, HEX);
-	display.display();
+	server.on(F("/"), [](){
+		server.send(200, "text/plain", "hello world");
+
+		display.setCursor(SCREEN_WIDTH - (11 * 6) / 2, (SCREEN_HEIGHT - 8) / 2);
+		display.setTextSize(1);
+		display.println("Hola mundo");
+	});
+
+	server.begin();
+
+	GenerateWifiQR(WiFi.softAPSSID(), WIFI_PASSWORD);
 }
 
 void loop()
 {
-	digitalWrite(GPIO_FOCUS, HIGH);
-	delay(2);
-	digitalWrite(GPIO_SHUTTER, HIGH);
-	delay(2000);
-	digitalWrite(GPIO_SHUTTER, LOW);
-	digitalWrite(GPIO_FOCUS, LOW);
+	// digitalWrite(GPIO_FOCUS, HIGH);
+	// delay(2);
+	// digitalWrite(GPIO_SHUTTER, HIGH);
+	// delay(2000);
+	// digitalWrite(GPIO_SHUTTER, LOW);
+	// digitalWrite(GPIO_FOCUS, LOW);
 
-	delay(100);
+	// delay(100);
 }
 
-// void start_test()
-// {
-
-// 	// draw a single pixel
-// 	display.drawPixel(10, 10, SH110X_WHITE);
-// 	// Show the display buffer on the hardware.
-// 	// NOTE: You _must_ call display after making any drawing commands
-// 	// to make them visible on the display hardware!
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw many lines
-// 	testdrawline();
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw rectangles
-// 	testdrawrect();
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw multiple rectangles
-// 	testfillrect();
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw mulitple circles
-// 	testdrawcircle();
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw a SH110X_WHITE circle, 10 pixel radius
-// 	display.fillCircle(display.width() / 2, display.height() / 2, 10, SH110X_WHITE);
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	testdrawroundrect();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	testfillroundrect();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	testdrawtriangle();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	testfilltriangle();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// draw the first ~12 characters in the font
-// 	testdrawchar();
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// text display tests
-// 	display.setTextSize(1);
-// 	display.setTextColor(SH110X_WHITE);
-// 	display.setCursor(0, 0);
-// 	display.println("Failure is always an option");
-// 	display.setTextColor(SH110X_BLACK, SH110X_WHITE); // 'inverted' text
-// 	display.println(3.141592);
-// 	display.setTextSize(2);
-// 	display.setTextColor(SH110X_WHITE);
-// 	display.print("0x");
-// 	display.println(0xDEADBEEF, HEX);
-// 	display.display();
-// 	delay(2000);
-// 	display.clearDisplay();
-
-// 	// miniature bitmap display
-// 	display.drawBitmap(30, 16, logo16_glcd_bmp, 16, 16, 1);
-// 	display.display();
-// 	delay(1);
-
-// 	// invert the display
-// 	display.invertDisplay(true);
-// 	delay(1000);
-// 	display.invertDisplay(false);
-// 	delay(1000);
-// 	display.clearDisplay();
-
-// 	// draw a bitmap icon and 'animate' movement
-// 	testdrawbitmap(logo16_glcd_bmp, LOGO16_GLCD_HEIGHT, LOGO16_GLCD_WIDTH);
-// }
-
-void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h)
+// Callback para manejo de eventos de WiFi
+void WiFiEvent(WiFiEvent_t event)
 {
-	uint8_t icons[NUMFLAKES][3];
+	Serial.println("Evento: " + event);
 
-	// initialize
-	for (uint8_t f = 0; f < NUMFLAKES; f++)
+	switch (event)
 	{
-		icons[f][XPOS] = random(display.width());
-		icons[f][YPOS] = 0;
-		icons[f][DELTAY] = random(5) + 1;
+	case WIFI_EVENT_AP_STACONNECTED:
+		Serial.println("¡Un cliente se ha conectado al AP!");
 
-		Serial.print("x: ");
-		Serial.print(icons[f][XPOS], DEC);
-		Serial.print(" y: ");
-		Serial.print(icons[f][YPOS], DEC);
-		Serial.print(" dy: ");
-		Serial.println(icons[f][DELTAY], DEC);
-	}
-
-	while (1)
-	{
-		// draw each icon
-		for (uint8_t f = 0; f < NUMFLAKES; f++)
-		{
-			display.drawBitmap(icons[f][XPOS], icons[f][YPOS], bitmap, w, h, SH110X_WHITE);
-		}
+		display.clearDisplay();
 		display.display();
-		delay(200);
 
-		// then erase it + move it
-		for (uint8_t f = 0; f < NUMFLAKES; f++)
+		ShowInfoBar();
+		ShowTaskBar();
+
+		break;
+
+	case WIFI_EVENT_AP_STADISCONNECTED:
+		Serial.println("Un cliente se ha desconectado del AP.");
+		GenerateWifiQR(WiFi.softAPSSID(), WIFI_PASSWORD);
+
+		break;
+	default:
+		break;
+	}
+}
+
+void ShowTaskBar()
+{
+	display.fillRect(0, 8, 128, 1, SH110X_WHITE);
+	display.setCursor(0, 0);
+	display.setTextSize(1);
+	display.setTextColor(SH110X_BLACK, SH110X_WHITE);
+	display.print("Status: ");
+	display.setTextColor(SH110X_WHITE, SH110X_BLACK);
+	display.print("Idle");
+	display.display();
+}
+
+void ShowInfoBar()
+{
+	String ip_string = WiFi.softAPIP().toString();
+	Serial.println(ip_string);
+
+	display.fillRect(0, 55, 128, 1, SH110X_WHITE);
+	display.setCursor(128 - (ip_string.length() * 6), 56);
+	display.setTextSize(1);
+	display.setTextColor(SH110X_BLACK, SH110X_WHITE);
+	display.print(ip_string);
+	display.display();
+}
+
+void GenerateWifiQR(String ssid, String password)
+{
+	//  "WIFI:S:MiRedWiFi;T:WPA;P:contraseña123;H:false;;"
+	delay(100);
+	String wifiData = "WIFI:S:" + ssid + ";T:WPA;P:" + password + ";H:false;;";
+	const char *ptrWifiData = wifiData.c_str();
+
+	Serial.println(ptrWifiData);
+	delay(100);
+
+	QRCode qrcode;
+	uint8_t qrcodeData[qrcode_getBufferSize(3)];
+	qrcode_initText(&qrcode, qrcodeData, 3, 0, ptrWifiData);
+
+	// Clear the display
+	display.clearDisplay();
+
+	display.setTextSize(1);
+	display.setCursor(0, 0);
+	// display.setTextColor(SH110X_BLACK, SH110X_WHITE); // 'inverted' text
+	display.println("Escanea para conectar");
+
+	// Calculate the scale factor
+	int scale = min(SCREEN_WIDTH / qrcode.size, (SCREEN_HEIGHT - 6) / qrcode.size);
+
+	// Calculate horizontal shift
+	int shiftX = (SCREEN_WIDTH - qrcode.size * scale) / 2;
+
+	// Calculate horizontal shift
+	int shiftY = ((SCREEN_HEIGHT + 6) - qrcode.size * scale) / 2;
+
+	// Draw the QR code on the display
+	for (uint8_t y = 0; y < qrcode.size; y++)
+	{
+		for (uint8_t x = 0; x < qrcode.size; x++)
 		{
-			display.drawBitmap(icons[f][XPOS], icons[f][YPOS], bitmap, w, h, SH110X_BLACK);
-			// move it
-			icons[f][YPOS] += icons[f][DELTAY];
-			// if its gone, reinit
-			if (icons[f][YPOS] > display.height())
+			if (qrcode_getModule(&qrcode, x, y))
 			{
-				icons[f][XPOS] = random(display.width());
-				icons[f][YPOS] = 0;
-				icons[f][DELTAY] = random(5) + 1;
+				display.fillRect(shiftX + x * scale, shiftY + y * scale, scale, scale, SH110X_WHITE);
 			}
 		}
 	}
-}
 
-void testdrawchar(void)
-{
-	display.setTextSize(1);
-	display.setTextColor(SH110X_WHITE);
-	display.setCursor(0, 0);
-
-	for (uint8_t i = 0; i < 168; i++)
-	{
-		if (i == '\n')
-			continue;
-		display.write(i);
-		if ((i > 0) && (i % 21 == 0))
-			display.println();
-	}
+	// Update the display
 	display.display();
-	delay(1);
-}
-
-void testdrawcircle(void)
-{
-	for (int16_t i = 0; i < display.height(); i += 2)
-	{
-		display.drawCircle(display.width() / 2, display.height() / 2, i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-}
-
-void testfillrect(void)
-{
-	uint8_t color = 1;
-	for (int16_t i = 0; i < display.height() / 2; i += 3)
-	{
-		// alternate colors
-		display.fillRect(i, i, display.width() - i * 2, display.height() - i * 2, color % 2);
-		display.display();
-		delay(1);
-		color++;
-	}
-}
-
-void testdrawtriangle(void)
-{
-	for (int16_t i = 0; i < min(display.width(), display.height()) / 2; i += 5)
-	{
-		display.drawTriangle(display.width() / 2, display.height() / 2 - i,
-							 display.width() / 2 - i, display.height() / 2 + i,
-							 display.width() / 2 + i, display.height() / 2 + i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-}
-
-void testfilltriangle(void)
-{
-	uint8_t color = SH110X_WHITE;
-	for (int16_t i = min(display.width(), display.height()) / 2; i > 0; i -= 5)
-	{
-		display.fillTriangle(display.width() / 2, display.height() / 2 - i,
-							 display.width() / 2 - i, display.height() / 2 + i,
-							 display.width() / 2 + i, display.height() / 2 + i, SH110X_WHITE);
-		if (color == SH110X_WHITE)
-			color = SH110X_BLACK;
-		else
-			color = SH110X_WHITE;
-		display.display();
-		delay(1);
-	}
-}
-
-void testdrawroundrect(void)
-{
-	for (int16_t i = 0; i < display.height() / 2 - 2; i += 2)
-	{
-		display.drawRoundRect(i, i, display.width() - 2 * i, display.height() - 2 * i, display.height() / 4, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-}
-
-void testfillroundrect(void)
-{
-	uint8_t color = SH110X_WHITE;
-	for (int16_t i = 0; i < display.height() / 2 - 2; i += 2)
-	{
-		display.fillRoundRect(i, i, display.width() - 2 * i, display.height() - 2 * i, display.height() / 4, color);
-		if (color == SH110X_WHITE)
-			color = SH110X_BLACK;
-		else
-			color = SH110X_WHITE;
-		display.display();
-		delay(1);
-	}
-}
-
-void testdrawrect(void)
-{
-	for (int16_t i = 0; i < display.height() / 2; i += 2)
-	{
-		display.drawRect(i, i, display.width() - 2 * i, display.height() - 2 * i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-}
-
-void testdrawline()
-{
-	for (int16_t i = 0; i < display.width(); i += 4)
-	{
-		display.drawLine(0, 0, i, display.height() - 1, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	for (int16_t i = 0; i < display.height(); i += 4)
-	{
-		display.drawLine(0, 0, display.width() - 1, i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	delay(250);
-
-	display.clearDisplay();
-	for (int16_t i = 0; i < display.width(); i += 4)
-	{
-		display.drawLine(0, display.height() - 1, i, 0, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	for (int16_t i = display.height() - 1; i >= 0; i -= 4)
-	{
-		display.drawLine(0, display.height() - 1, display.width() - 1, i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	delay(250);
-
-	display.clearDisplay();
-	for (int16_t i = display.width() - 1; i >= 0; i -= 4)
-	{
-		display.drawLine(display.width() - 1, display.height() - 1, i, 0, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	for (int16_t i = display.height() - 1; i >= 0; i -= 4)
-	{
-		display.drawLine(display.width() - 1, display.height() - 1, 0, i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	delay(250);
-
-	display.clearDisplay();
-	for (int16_t i = 0; i < display.height(); i += 4)
-	{
-		display.drawLine(display.width() - 1, 0, 0, i, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	for (int16_t i = 0; i < display.width(); i += 4)
-	{
-		display.drawLine(display.width() - 1, 0, i, display.height() - 1, SH110X_WHITE);
-		display.display();
-		delay(1);
-	}
-	delay(250);
 }
