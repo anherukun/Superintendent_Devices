@@ -1,5 +1,9 @@
+#ifndef SHOOTERMANAGER_H
+#define SHOOTERMANAGER_H
+
 #include "GPIO_Definitions.h"
 #include "UIManager.h"
+// #include "CameraProgram.h"
 
 class ShooterManager
 {
@@ -17,6 +21,28 @@ public:
         digitalWrite(GPIO_SHUTTER, LOW);
         digitalWrite(GPIO_FOCUS, LOW);
         digitalWrite(GPIO_POWER, LOW);
+    }
+
+    void Focus()
+    {
+        ui.SetStatus("Focussing");
+        
+        digitalWrite(GPIO_FOCUS, HIGH);
+        delay(100);
+    }
+
+    void Shoot(int millis = 0)
+    {
+        ui.SetStatus("Shooting");
+        digitalWrite(GPIO_SHUTTER, HIGH);
+        delay(millis + 2);
+        digitalWrite(GPIO_SHUTTER, LOW);
+    }
+
+    void Release() 
+    {
+        digitalWrite(GPIO_SHUTTER, LOW);
+        digitalWrite(GPIO_FOCUS, LOW);
     }
 
     void TakeShoot()
@@ -38,3 +64,5 @@ public:
 // ShooterManager::ShooterManager(/* args */)
 // {
 // }
+
+#endif

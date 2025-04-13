@@ -1,9 +1,11 @@
-// #ifndef UIMANAGER_H
-// #define UIMANAGER_H
+#ifndef UIMANAGER_H
+#define UIMANAGER_H
 
 // Eliminar del directorio C:\Users\angel\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk\esp32c3\include
 // la carpeta qrcode
 #include "qrcode.h"
+#include "CameraProgram.h"
+#include "Icons.h"
 
 #include <SPI.h>
 #include <Wire.h>
@@ -18,6 +20,9 @@
 #define SCREEN_HEIGHT 64 // OLED display height, in pixels
 #define OLED_RESET -1    //   QT-PY / XIAO
 
+#define SAFE_Y_1 9
+#define SAFE_Y_2 55
+
 Adafruit_SH1106G display = Adafruit_SH1106G(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 class UIManager
@@ -25,6 +30,9 @@ class UIManager
 private:
     String Status_Value;
     String Info02_Value;
+
+    String Mode_Value;
+    String ExpoTime_Value;
 
     void ShowTaskBar()
     {
@@ -68,7 +76,8 @@ public:
         display.display();
     }
 
-    void Setup(int sda, int scl) {
+    void Setup(int sda, int scl)
+    {
         Wire.begin(sda, scl);
 
         delay(250);                       // wait for the OLED to power up
@@ -84,15 +93,54 @@ public:
 
     void SetStatus(String v) { this->Status_Value = v; }
     void SetInfo02(String v) { this->Info02_Value = v; }
+    void SetMode(String v) { this->Mode_Value = v; }
+    void SetExpoTime(String v) { this->ExpoTime_Value = v; }
 
     void ClearDisplay() { display.clearDisplay(); }
 
-    void UpdateUI()
+    void UpdateUI(byte pgrm_option)
     {
         ClearDisplay();
 
-        ShowInfoBar();
         ShowTaskBar();
+        SelectUILayout(pgrm_option);
+        ShowInfoBar();
+    }
+
+    void SelectUILayout(byte pgrm_option)
+    {
+        switch (pgrm_option)
+        {
+        case PRGM_MODE_SINGLE_SHOOT:
+            LoadSingleShootModeUI();
+            break;
+        case PRGM_MODE_SINGLE_SHOOT_BULB:
+            LoadSingleShootBulbModeUI();
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    void LoadSingleShootModeUI()
+    {
+        display.setCursor(0, SAFE_Y_1 + 1);
+        display.setTextSize(1);
+        display.print("M: ");
+        display.println(Mode_Value);
+        display.display();
+    }
+
+    void LoadSingleShootBulbModeUI()
+    {
+        display.setCursor(0, SAFE_Y_1 + 1);
+        display.setTextSize(1);
+        display.print("M: ");
+        display.println(Mode_Value);
+        display.drawBitmap(display.getCursorX(), display.getCursorY(), ROUND_CLOCK, 8, 8, SH110X_WHITE);
+        display.println(ExpoTime_Value);
+        display.display();
     }
 
     void PrintWifiQR(String ssid, String password)
@@ -145,4 +193,4 @@ public:
     }
 };
 
-// #endif
+#endif
