@@ -4,8 +4,8 @@
 // Eliminar del directorio C:\Users\angel\AppData\Local\Arduino15\packages\esp32\hardware\esp32\2.0.14\tools\sdk\esp32c3\include
 // la carpeta qrcode
 #include "qrcode.h"
-#include "CameraProgram.h"
 #include "Icons.h"
+#include "../Camtools/CameraPRGMModes.h"
 
 #include <SPI.h>
 #include <Wire.h>
@@ -33,6 +33,9 @@ private:
 
     String Mode_Value;
     String ExpoTime_Value;
+    String BurstLimit_Value;
+    String BurstTimeBetween_Value;
+    String ReburstLimit_Value;
 
     void ShowTaskBar()
     {
@@ -95,6 +98,9 @@ public:
     void SetInfo02(String v) { this->Info02_Value = v; }
     void SetMode(String v) { this->Mode_Value = v; }
     void SetExpoTime(String v) { this->ExpoTime_Value = v; }
+    void SetBurstLimit(String v) { this->BurstLimit_Value = v; }
+    void SetBurstTimeBetween(String v) { this->BurstTimeBetween_Value = v; }
+    void SetReburstLimit(String v) { this->ReburstLimit_Value = v; }
 
     void ClearDisplay() { display.clearDisplay(); }
 
@@ -117,6 +123,17 @@ public:
         case PRGM_MODE_SINGLE_SHOOT_BULB:
             LoadSingleShootBulbModeUI();
             break;
+        case PRGM_MODE_BURST_SHOOT:
+            LoadBurstShootModeUI();
+            break;
+
+        case PRGM_MODE_BURST_SHOOT_BULB:
+            LoadBurstBulbShootModeUI();
+            break;
+
+        case PRGM_MODE_REBURST_SHOOT:
+            LoadReburstShootModeUI();
+            break;
 
         default:
             break;
@@ -125,22 +142,93 @@ public:
 
     void LoadSingleShootModeUI()
     {
-        display.setCursor(0, SAFE_Y_1 + 1);
-        display.setTextSize(1);
-        display.print("M: ");
-        display.println(Mode_Value);
+        PrintLabelValue(CIRCLE_DOT, Mode_Value, 0, SAFE_Y_1);
+
         display.display();
     }
 
     void LoadSingleShootBulbModeUI()
     {
-        display.setCursor(0, SAFE_Y_1 + 1);
-        display.setTextSize(1);
-        display.print("M: ");
-        display.println(Mode_Value);
-        display.drawBitmap(display.getCursorX(), display.getCursorY(), ROUND_CLOCK, 8, 8, SH110X_WHITE);
-        display.println(ExpoTime_Value);
+        PrintLabelValue(CIRCLE_DOT, Mode_Value, 0, SAFE_Y_1);
+
+        PrintLabelValue(SUN, ExpoTime_Value, 0, display.getCursorY());
+
         display.display();
+    }
+
+    void LoadBurstShootModeUI()
+    {
+        PrintLabelValue(CIRCLE_DOT, Mode_Value, 0, SAFE_Y_1);
+
+        if (BurstLimit_Value == "0")
+        {
+            display.drawBitmap(0, display.getCursorY(), CAMERA, 8, 8, SH110X_WHITE);
+            display.setCursor(8, display.getCursorY());
+            display.print(": ");
+            display.drawBitmap(display.getCursorX(), display.getCursorY(), INFINIY, 8, 8, SH110X_WHITE);
+            display.setCursor(display.getCursorX() + 8, display.getCursorY());
+            display.println(" p");
+        }
+        else
+            PrintLabelValue(CAMERA, BurstLimit_Value + " p", 0, display.getCursorY());
+
+        PrintLabelValue(ROUND_CLOCK, BurstTimeBetween_Value, 0, display.getCursorY());
+
+        display.display();
+    }
+
+    void LoadBurstBulbShootModeUI()
+    {
+        PrintLabelValue(CIRCLE_DOT, Mode_Value, 0, SAFE_Y_1);
+
+        PrintLabelValue(SUN, ExpoTime_Value, 0, display.getCursorY());
+
+        if (BurstLimit_Value == "0")
+        {
+            display.drawBitmap(0, display.getCursorY(), CAMERA, 8, 8, SH110X_WHITE);
+            display.setCursor(8, display.getCursorY());
+            display.print(": ");
+            display.drawBitmap(display.getCursorX(), display.getCursorY(), INFINIY, 8, 8, SH110X_WHITE);
+            display.setCursor(display.getCursorX() + 8, display.getCursorY());
+            display.println(" p");
+        }
+        else
+            PrintLabelValue(CAMERA, BurstLimit_Value + " p", 0, display.getCursorY());
+
+        PrintLabelValue(ROUND_CLOCK, BurstTimeBetween_Value, 0, display.getCursorY());
+
+        display.display();
+    }
+
+    void LoadReburstShootModeUI()
+    {
+        PrintLabelValue(CIRCLE_DOT, Mode_Value, 0, SAFE_Y_1 + 1);
+
+        if (BurstLimit_Value == "0")
+        {
+            display.drawBitmap(0, display.getCursorY(), CAMERA, 8, 8, SH110X_WHITE);
+            display.setCursor(8, display.getCursorY());
+            display.print(": ");
+            display.drawBitmap(display.getCursorX(), display.getCursorY(), INFINIY, 8, 8, SH110X_WHITE);
+            display.setCursor(display.getCursorX() + 8, display.getCursorY());
+            display.println(" p");
+        }
+        else
+            PrintLabelValue(CAMERA, BurstLimit_Value + " p", 0, display.getCursorY());
+
+        PrintLabelValue(ROUND_CLOCK, BurstTimeBetween_Value, 0, display.getCursorY());
+
+        PrintLabelValue(DOUBLE_ARROW, ReburstLimit_Value, 0, display.getCursorY());
+
+        display.display();
+    }
+
+    void PrintLabelValue(const unsigned char icon[], String value, int16_t x, int16_t y)
+    {
+        display.drawBitmap(x, y + 1, icon, 8, 8, SH110X_WHITE);
+        display.setCursor(x + 8, y + 1);
+
+        display.println(": " + value);
     }
 
     void PrintWifiQR(String ssid, String password)

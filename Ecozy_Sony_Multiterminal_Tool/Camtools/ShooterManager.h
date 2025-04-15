@@ -1,8 +1,8 @@
 #ifndef SHOOTERMANAGER_H
 #define SHOOTERMANAGER_H
 
-#include "GPIO_Definitions.h"
-#include "UIManager.h"
+#include "../GPIO_Definitions.h"
+#include "../UI/UIManager.h"
 // #include "CameraProgram.h"
 
 class ShooterManager
