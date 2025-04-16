@@ -31,6 +31,14 @@ public:
         delay(100);
     }
 
+    void Focus(int d)
+    {
+        ui.SetStatus("Focussing");
+        
+        digitalWrite(GPIO_FOCUS, HIGH);
+        delay(d);
+    }
+
     void Shoot(int millis = 0)
     {
         ui.SetStatus("Shooting");
@@ -43,6 +51,8 @@ public:
     {
         digitalWrite(GPIO_SHUTTER, LOW);
         digitalWrite(GPIO_FOCUS, LOW);
+
+        ui.SetStatus("Ready");
     }
 
     void TakeShoot()

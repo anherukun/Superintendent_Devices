@@ -10,10 +10,17 @@
 #include "WebServerRequests.h"
 #include "GPIO_Definitions.h"
 
+#include "Web/public/index.h"
+#include "Web/public/modes/simpleb.h"
+#include "Web/public/modes/burst.h"
+#include "Web/public/modes/burstb.h"
+#include "Web/public/modes/reburst.h"
+
 #include <WiFi.h>
 #include <WiFiClient.h>
 #include <AsyncTCP.h>
 #include <ESPmDNS.h>
+#include <SPIFFS.h>
 
 // #define WIFI_QR "WIFI:S:MiRedWiFi;T:WPA;P:contraseña123;H:false;;"
 #define WIFI_PASSWORD "19961999"
@@ -29,6 +36,7 @@ bool ClientConnected = false;
 
 void setup()
 {
+	SPIFFS.begin();
 	Serial.begin(115200);
 
 	WiFi.softAP("EZ_" + WiFi.macAddress().substring(12, 17), WIFI_PASSWORD, 1, 0, 1);
@@ -41,7 +49,7 @@ void setup()
 	delay(500);
 
 	server.on("/", [](AsyncWebServerRequest *request)
-			  { request->send(200, "text/plain", "ok"); });
+			  { request->send_P(200, "text/html", index_html); });
 	//   {
 
 	// 	  // display.setCursor((SCREEN_WIDTH / 2) - (11 * 6) / 2, ((SCREEN_HEIGHT / 2) - 4));
@@ -51,6 +59,36 @@ void setup()
 
 	// 	  // request->send(200, "text/plain", "hello world"); }
 	//   });
+
+	server.on("/modes/simple", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->redirect("/pgrm/load?mode=0&exp_t=0&burst_c=0&reburst_c=0&burst_tb=0"); });
+
+	server.on("/modes/simpleb", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->send_P(200, "text/html", simpleb_html); });
+
+	server.on("/modes/burst", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->send_P(200, "text/html", burst_html); });
+
+	server.on("/modes/burstb", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->send_P(200, "text/html", burstb_html); });
+
+	server.on("/modes/reburst", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->send_P(200, "text/html", reburst_html); });
+
+	server.on("/pgrm/review", [](AsyncWebServerRequest *request)
+			  {
+				  // shooter.TakeShoot();
+				  request->send_P(200, "text/html", reburst_html); });
 
 	server.on("/trigger-shoot", [](AsyncWebServerRequest *request)
 			  {
@@ -87,49 +125,59 @@ void setup()
 				  camera.LoadProgram(pgrm_mode, exp_time, burst_c, reburst_c, burst_time_b);
 
 				  ui.SetStatus("PGRM Loaded");
+				  ui.SetMode(camera.GetProgramModePretty());
 				  ui.SetExpoTime(camera.GetExpositionTimePretty());
 				  ui.SetBurstLimit(String(camera.GetBurstCount()));
 				  ui.SetBurstTimeBetween(camera.GetBurstTimeBetweenPretty());
 				  ui.SetReburstLimit(String(camera.GetReburstCount()));
 
-				  request->send(200, "text/plain", "PGRM Loaded"); });
+				  shooter.Focus(1000);
+				  shooter.Release();
+
+				  ui.UpdateUI(camera.GetPROGRAM());
+
+				  request->redirect("/");
+				  //   request->send(200, "text/plain", "PGRM Loaded");
+			  });
 
 	server.begin();
+
+	server.serveStatic("/", SPIFFS, "/");
 
 	ui.PrintWifiQR(WiFi.softAPSSID(), WIFI_PASSWORD);
 }
 
 void loop()
 {
-	switch (camera.GetPROGRAM())
-	{
-	case PRGM_MODE_SINGLE_SHOOT:
-		ui.SetMode("Single S.");
-		break;
+	// switch (camera.GetPROGRAM())
+	// {
+	// case PRGM_MODE_SINGLE_SHOOT:
+	// 	ui.SetMode("Single S.");
+	// 	break;
 
-	case PRGM_MODE_SINGLE_SHOOT_BULB:
-		ui.SetMode("Bulb S.");
-		break;
+	// case PRGM_MODE_SINGLE_SHOOT_BULB:
+	// 	ui.SetMode("Bulb S.");
+	// 	break;
 
-	case PRGM_MODE_BURST_SHOOT:
-		ui.SetMode("Burst S.");
-		break;
+	// case PRGM_MODE_BURST_SHOOT:
+	// 	ui.SetMode("Burst S.");
+	// 	break;
 
-	case PRGM_MODE_BURST_SHOOT_BULB:
-		ui.SetMode("Bulb B.");
-		break;
+	// case PRGM_MODE_BURST_SHOOT_BULB:
+	// 	ui.SetMode("Bulb B.");
+	// 	break;
 
-	case PRGM_MODE_REBURST_SHOOT:
-		ui.SetMode("Reburst");
-		break;
+	// case PRGM_MODE_REBURST_SHOOT:
+	// 	ui.SetMode("Reburst");
+	// 	break;
 
-	default:
-		break;
-	}
-	if (ClientConnected)
-		ui.UpdateUI(camera.GetPROGRAM());
+	// default:
+	// 	break;
+	// }
+	// if (ClientConnected)
+	// 	ui.UpdateUI(camera.GetPROGRAM());
 
-	delay(300); // FrameRate 5 fps
+	// delay(300); // FrameRate 5 fps
 }
 
 // Callback para manejo de eventos de WiFi
@@ -146,6 +194,8 @@ void WiFiEvent(WiFiEvent_t event)
 		ui.SetInfo02(WiFi.softAPIP().toString());
 
 		ClientConnected = true;
+
+		ui.UpdateUI(PRGM_MODE_IDLE);
 
 		break;
 

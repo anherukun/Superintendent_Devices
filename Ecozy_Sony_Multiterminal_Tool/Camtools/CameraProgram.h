@@ -32,6 +32,31 @@ public:
     byte GetReburstCount() { return Reburst_Count; }
     int GetBurstTimeBetween() { return Burst_Time_Between; }
 
+    String GetProgramModePretty()
+    {
+        switch (PRGM_Mode)
+        {
+        case PRGM_MODE_SINGLE_SHOOT:
+            return "Single S.";
+
+        case PRGM_MODE_SINGLE_SHOOT_BULB:
+            return "Bulb S.";
+
+        case PRGM_MODE_BURST_SHOOT:
+            return "Burst S.";
+
+        case PRGM_MODE_BURST_SHOOT_BULB:
+            return "Bulb B.";
+            break;
+
+        case PRGM_MODE_REBURST_SHOOT:
+            return "Reburst";
+
+        default:
+            return "Unknown";
+        }
+    }
+
     String GetExpositionTimePretty()
     {
         if (Exposition_Time >= 60000)
