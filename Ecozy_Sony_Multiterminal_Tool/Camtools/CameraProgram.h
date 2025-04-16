@@ -8,6 +8,7 @@ class CameraProgram
 {
 private:
     ShooterManager &shooter;
+    UIManager &ui;
 
     byte PRGM_Mode = PRGM_MODE_IDLE;
     int Exposition_Time;
@@ -18,13 +19,32 @@ private:
 
     void RunSingleShoot()
     {
+        ui.SetStatus("Focussing");
+        ui.UpdateUI(PRGM_Mode);
         shooter.Focus();
+        ui.SetStatus("Shooting");
+        ui.UpdateUI(PRGM_Mode);
         shooter.Shoot();
         shooter.Release();
+        ui.SetStatus("Ready");
+        ui.UpdateUI(PRGM_Mode);
+    }
+
+    void RunSingleShootBulb()
+    {
+        ui.SetStatus("Focussing");
+        ui.UpdateUI(PRGM_Mode);
+        shooter.Focus();
+        ui.SetStatus("Shooting");
+        ui.UpdateUI(PRGM_Mode);
+        shooter.Shoot(Exposition_Time);
+        shooter.Release();
+        ui.SetStatus("Ready");
+        ui.UpdateUI(PRGM_Mode);
     }
 
 public:
-    CameraProgram(ShooterManager &s) : shooter(s) {}
+    CameraProgram(ShooterManager &s, UIManager &u) : shooter(s), ui(u) {}
 
     byte GetPROGRAM() { return PRGM_Mode; }
     int GetExpositionTime() { return Exposition_Time; }
@@ -93,7 +113,7 @@ public:
             break;
 
         case PRGM_MODE_SINGLE_SHOOT_BULB:
-            // ui.SetMode("Bulb S.");
+            RunSingleShootBulb();
             break;
 
         case PRGM_MODE_BURST_SHOOT:

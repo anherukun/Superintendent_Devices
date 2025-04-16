@@ -15,6 +15,7 @@
 #include "Web/public/modes/burst.h"
 #include "Web/public/modes/burstb.h"
 #include "Web/public/modes/reburst.h"
+#include "Web/public/pgrm/review.h"
 
 #include <WiFi.h>
 #include <WiFiClient.h>
@@ -30,7 +31,7 @@ AsyncWebServer server(80);
 UIManager ui = UIManager();
 
 ShooterManager shooter(ui);
-CameraProgram camera(shooter);
+CameraProgram camera(shooter, ui);
 
 bool ClientConnected = false;
 
@@ -88,12 +89,17 @@ void setup()
 	server.on("/pgrm/review", [](AsyncWebServerRequest *request)
 			  {
 				  // shooter.TakeShoot();
-				  request->send_P(200, "text/html", reburst_html); });
+				  request->send_P(200, "text/html", review_html); });
 
 	server.on("/trigger-shoot", [](AsyncWebServerRequest *request)
 			  {
 				  shooter.TakeShoot();
 				  request->send(200, "text/plain", "ok"); });
+
+	server.on("/pgrm/start", [](AsyncWebServerRequest *request)
+			  {
+				  request->send(200, "text/plain", "ok");
+				  camera.RunProgram(); });
 
 	// 192.168.4.1/pgrm/load?mode=<PRGM_MODE>&exp_t=<SECONDS>&burst_c=<COUNT>&reburst_c=<COUNT>&burst_tb=<SECONDS>
 	// 192.168.4.1/pgrm/load?mode=<0>&exp_t=<0>&burst_c=<0>&reburst_c=<0>&burst_tb=<0>
@@ -136,7 +142,7 @@ void setup()
 
 				  ui.UpdateUI(camera.GetPROGRAM());
 
-				  request->redirect("/");
+				  request->redirect("/pgrm/review");
 				  //   request->send(200, "text/plain", "PGRM Loaded");
 			  });
 

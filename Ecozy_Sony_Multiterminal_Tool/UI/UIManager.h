@@ -106,11 +106,15 @@ public:
 
     void UpdateUI(byte pgrm_option)
     {
+        delay(2);
         ClearDisplay();
 
         ShowTaskBar();
         SelectUILayout(pgrm_option);
         ShowInfoBar();
+        delay(2);
+
+        display.display();
     }
 
     void SelectUILayout(byte pgrm_option)

@@ -25,7 +25,7 @@ public:
 
     void Focus()
     {
-        ui.SetStatus("Focussing");
+        // ui.SetStatus("Focussing");
         
         digitalWrite(GPIO_FOCUS, HIGH);
         delay(100);
@@ -33,7 +33,7 @@ public:
 
     void Focus(int d)
     {
-        ui.SetStatus("Focussing");
+        // ui.SetStatus("Focussing");
         
         digitalWrite(GPIO_FOCUS, HIGH);
         delay(d);
@@ -41,7 +41,7 @@ public:
 
     void Shoot(int millis = 0)
     {
-        ui.SetStatus("Shooting");
+        // ui.SetStatus("Shooting");
         digitalWrite(GPIO_SHUTTER, HIGH);
         delay(millis + 2);
         digitalWrite(GPIO_SHUTTER, LOW);
@@ -52,7 +52,7 @@ public:
         digitalWrite(GPIO_SHUTTER, LOW);
         digitalWrite(GPIO_FOCUS, LOW);
 
-        ui.SetStatus("Ready");
+        // ui.SetStatus("Ready");
     }
 
     void TakeShoot()
