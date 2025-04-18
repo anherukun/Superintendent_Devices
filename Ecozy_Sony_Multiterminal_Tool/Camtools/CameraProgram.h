@@ -21,11 +21,11 @@ private:
     {
         ui.SetStatus("Focussing");
         ui.UpdateUI(PRGM_Mode);
-        shooter.Focus();
+        shooter.Focus(500);
         ui.SetStatus("Shooting");
         ui.UpdateUI(PRGM_Mode);
         shooter.Shoot();
-        shooter.Release();
+        shooter.Release(true, true);
         ui.SetStatus("Ready");
         ui.UpdateUI(PRGM_Mode);
     }
@@ -34,11 +34,38 @@ private:
     {
         ui.SetStatus("Focussing");
         ui.UpdateUI(PRGM_Mode);
-        shooter.Focus();
+        shooter.Focus(500);
         ui.SetStatus("Shooting");
         ui.UpdateUI(PRGM_Mode);
         shooter.Shoot(Exposition_Time);
-        shooter.Release();
+        shooter.Release(true, true);
+        ui.SetStatus("Wating camera");
+        ui.UpdateUI(PRGM_Mode);
+        delay(Exposition_Time);
+        ui.SetStatus("Ready");
+        ui.UpdateUI(PRGM_Mode);
+    }
+
+    void RunBurstShoot()
+    {
+        ui.SetStatus("Focussing");
+        ui.UpdateUI(PRGM_Mode);
+        shooter.Focus(500);
+
+        ui.SetStatus("Shooting");
+        ui.UpdateUI(PRGM_Mode);
+        for (size_t i = 0; i < Burst_Count; i++)
+        {
+            String s = "Pic: " + String(i + 1) + "/" + Burst_Count;
+            ui.SetStatus(s);
+            ui.UpdateUI(PRGM_Mode);
+
+            shooter.Shoot();
+            // shooter.Release(true, false);
+            delay(Burst_Time_Between);
+        }
+
+        shooter.Release(true, true);
         ui.SetStatus("Ready");
         ui.UpdateUI(PRGM_Mode);
     }
@@ -117,7 +144,7 @@ public:
             break;
 
         case PRGM_MODE_BURST_SHOOT:
-            // ui.SetMode("Burst S.");
+            RunBurstShoot();
             break;
 
         case PRGM_MODE_BURST_SHOOT_BULB:

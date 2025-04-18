@@ -44,6 +44,7 @@ private:
         display.setTextSize(1);
         display.setTextColor(SH110X_BLACK, SH110X_WHITE);
         display.print("Status: ");
+        display.setCursor(display.getCursorX() + 1, display.getCursorY());
         display.setTextColor(SH110X_WHITE, SH110X_BLACK);
         display.print(Status_Value);
         display.display();

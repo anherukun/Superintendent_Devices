@@ -25,34 +25,29 @@ public:
 
     void Focus()
     {
-        // ui.SetStatus("Focussing");
-        
         digitalWrite(GPIO_FOCUS, HIGH);
         delay(100);
     }
 
     void Focus(int d)
     {
-        // ui.SetStatus("Focussing");
-        
         digitalWrite(GPIO_FOCUS, HIGH);
         delay(d);
     }
 
     void Shoot(int millis = 0)
     {
-        // ui.SetStatus("Shooting");
         digitalWrite(GPIO_SHUTTER, HIGH);
         delay(millis + 2);
         digitalWrite(GPIO_SHUTTER, LOW);
     }
 
-    void Release() 
+    void Release(bool shutter = false, bool focus = false) 
     {
-        digitalWrite(GPIO_SHUTTER, LOW);
-        digitalWrite(GPIO_FOCUS, LOW);
-
-        // ui.SetStatus("Ready");
+        if (shutter)
+            digitalWrite(GPIO_SHUTTER, LOW);
+        if (focus)
+            digitalWrite(GPIO_FOCUS, LOW);
     }
 
     void TakeShoot()

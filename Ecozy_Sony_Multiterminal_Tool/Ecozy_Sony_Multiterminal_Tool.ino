@@ -34,6 +34,7 @@ ShooterManager shooter(ui);
 CameraProgram camera(shooter, ui);
 
 bool ClientConnected = false;
+bool ControlTrigger = false;
 
 void setup()
 {
@@ -98,8 +99,9 @@ void setup()
 
 	server.on("/pgrm/start", [](AsyncWebServerRequest *request)
 			  {
-				  request->send(200, "text/plain", "ok");
-				  camera.RunProgram(); });
+				ControlTrigger = true;
+				//   camera.RunProgram();
+				request->send(200, "text/plain", "ok"); });
 
 	// 192.168.4.1/pgrm/load?mode=<PRGM_MODE>&exp_t=<SECONDS>&burst_c=<COUNT>&reburst_c=<COUNT>&burst_tb=<SECONDS>
 	// 192.168.4.1/pgrm/load?mode=<0>&exp_t=<0>&burst_c=<0>&reburst_c=<0>&burst_tb=<0>
@@ -138,7 +140,7 @@ void setup()
 				  ui.SetReburstLimit(String(camera.GetReburstCount()));
 
 				  shooter.Focus(1000);
-				  shooter.Release();
+				  shooter.Release(true, true);
 
 				  ui.UpdateUI(camera.GetPROGRAM());
 
@@ -155,6 +157,13 @@ void setup()
 
 void loop()
 {
+	if (ControlTrigger)
+	{
+		camera.RunProgram();
+
+		delay(5);
+		ControlTrigger = false;
+	}
 	// switch (camera.GetPROGRAM())
 	// {
 	// case PRGM_MODE_SINGLE_SHOOT:
